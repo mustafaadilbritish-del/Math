@@ -16,10 +16,14 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Choose your profile')),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 700;
+          return Row(
+            children: [
+              if (isWide) const SizedBox(width: 16),
+              Expanded(
+                child: ListView.builder(
               itemCount: profiles.length,
               itemBuilder: (_, index) {
                 final UserProfile p = profiles[index];
@@ -39,35 +43,45 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 );
               },
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Create Profile'),
-              onPressed: () async {
-                final controller = TextEditingController();
-                final name = await showDialog<String>(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('Enter name'),
-                    content: TextField(controller: controller, autofocus: true),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-                      ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('OK')),
-                    ],
-                  ),
-                );
-                if (name != null && name.isNotEmpty) {
-                  await ref.read(profilesProvider.notifier).addProfile(name);
-                }
-              },
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
+                ),
+              ),
+              SizedBox(width: isWide ? 24 : 0),
+              Padding(
+                padding: EdgeInsets.all(isWide ? 24.0 : 12.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: isWide ? 260 : double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.add),
+                        label: const Text('Create Profile'),
+                        onPressed: () async {
+                          final controller = TextEditingController();
+                          final name = await showDialog<String>(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: const Text('Enter name'),
+                              content: TextField(controller: controller, autofocus: true),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                                ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('OK')),
+                              ],
+                            ),
+                          );
+                          if (name != null && name.isNotEmpty) {
+                            await ref.read(profilesProvider.notifier).addProfile(name);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

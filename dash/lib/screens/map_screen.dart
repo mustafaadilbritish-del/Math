@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/app_providers.dart';
 import '../models/progress_models.dart';
+import '../utils/responsive.dart';
 import 'lesson_screen.dart';
 
 class MapScreen extends ConsumerWidget {
@@ -11,7 +12,7 @@ class MapScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final progress = ref.watch(progressMapProvider);
+    ref.watch(progressMapProvider);
     final settings = ref.watch(appSettingsProvider);
 
     return Scaffold(
@@ -29,10 +30,10 @@ class MapScreen extends ConsumerWidget {
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: GridView.count(
-          crossAxisCount: 3,
-          childAspectRatio: 1.1,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+          crossAxisCount: gridCountForWidth(context, phone: 3, tablet: 4, desktop: 6, largeDesktop: 8),
+          childAspectRatio: isPhone(context) ? 1.0 : 1.2,
+          crossAxisSpacing: isPhone(context) ? 8 : 12,
+          mainAxisSpacing: isPhone(context) ? 8 : 12,
           children: [
             for (int t = 2; t <= 12; t++)
               _LessonNode(

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/app_providers.dart';
-import '../models/progress_models.dart';
+import '../utils/responsive.dart';
 
 class LessonArgs {
   final int table;
@@ -149,7 +149,10 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
               child: Center(
                 child: Text(
                   prompt,
-                  style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: scaledFontSize(context, baseOnPhone: 36, maxOnDesktop: 64),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -211,11 +214,11 @@ class _NumberPadState extends State<_NumberPad> {
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 3,
-          childAspectRatio: 1.6,
+          crossAxisCount: isPhone(context) ? 3 : 6,
+          childAspectRatio: isPhone(context) ? 1.6 : 2.2,
           padding: EdgeInsets.zero,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
+          crossAxisSpacing: isPhone(context) ? 8 : 12,
+          mainAxisSpacing: isPhone(context) ? 8 : 12,
           children: [
             for (final d in ['1','2','3','4','5','6','7','8','9','C','0','OK'])
               ElevatedButton(
