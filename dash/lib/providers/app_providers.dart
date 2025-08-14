@@ -4,9 +4,14 @@ import 'package:uuid/uuid.dart';
 import '../models/user_profile.dart';
 import '../models/progress_models.dart';
 import '../services/storage_service.dart';
+import '../services/sound_service.dart';
 
 final storageServiceProvider = Provider<StorageService>((ref) {
   return StorageService();
+});
+
+final soundServiceProvider = Provider<SoundService>((ref) {
+  return const SoundService();
 });
 
 final appInitializationProvider = FutureProvider<void>((ref) async {

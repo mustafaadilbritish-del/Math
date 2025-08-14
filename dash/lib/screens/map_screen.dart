@@ -13,17 +13,14 @@ class MapScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(progressMapProvider);
-    final settings = ref.watch(appSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Learning Path'),
+        title: const Text('Dash'),
         actions: [
           IconButton(
-            icon: Icon(settings.animationsEnabled ? Icons.animation : Icons.animation_outlined),
-            onPressed: () => ref.read(appSettingsProvider.notifier).state = settings.copyWith(
-                  animationsEnabled: !settings.animationsEnabled,
-                ),
+            icon: const Icon(Icons.settings),
+            onPressed: () {},
           ),
         ],
       ),
@@ -39,32 +36,32 @@ class MapScreen extends ConsumerWidget {
                 desktop: 6,
                 largeDesktop: 8,
               );
-              return GridView.count(
-                crossAxisCount: crossAxisCount,
-                childAspectRatio: isPhone(context) ? 1.0 : 1.2,
-                crossAxisSpacing: isPhone(context) ? 8 : 12,
-                mainAxisSpacing: isPhone(context) ? 8 : 12,
-                children: [
-                  for (int t = 2; t <= 12; t++)
-                    _LessonNode(
-                      label: 'x$t',
-                      progress: ref.read(progressMapProvider.notifier).getProgress(t, false),
-                      onTap: () => Navigator.of(context).pushNamed(
-                        LessonScreen.routeName,
-                        arguments: LessonArgs(table: t, isDivision: false),
-                      ),
-                    ),
-                  for (int t = 2; t <= 12; t++)
-                    _LessonNode(
-                      label: '÷$t',
-                      progress: ref.read(progressMapProvider.notifier).getProgress(t, true),
-                      onTap: () => Navigator.of(context).pushNamed(
-                        LessonScreen.routeName,
-                        arguments: LessonArgs(table: t, isDivision: true),
-                      ),
-                    ),
-                ],
-              );
+                             return GridView.count(
+                 crossAxisCount: crossAxisCount,
+                 childAspectRatio: isPhone(context) ? 1.0 : 1.2,
+                 crossAxisSpacing: isPhone(context) ? 8 : 12,
+                 mainAxisSpacing: isPhone(context) ? 8 : 12,
+                 children: [
+                   for (int t = 2; t <= 12; t++)
+                     _LessonNode(
+                       label: '×$t',
+                       progress: ref.read(progressMapProvider.notifier).getProgress(t, false),
+                       onTap: () => Navigator.of(context).pushNamed(
+                         LessonScreen.routeName,
+                         arguments: LessonArgs(table: t, isDivision: false),
+                       ),
+                     ),
+                   for (int t = 2; t <= 12; t++)
+                     _LessonNode(
+                       label: '÷$t',
+                       progress: ref.read(progressMapProvider.notifier).getProgress(t, true),
+                       onTap: () => Navigator.of(context).pushNamed(
+                         LessonScreen.routeName,
+                         arguments: LessonArgs(table: t, isDivision: true),
+                       ),
+                     ),
+                 ],
+               );
             },
           ),
         ),
@@ -95,7 +92,7 @@ class _LessonNode extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(label, style: TextStyle(fontSize: scaledFontSize(context, baseOnPhone: 22, maxOnDesktop: 32), fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text(label, style: TextStyle(fontSize: scaledFontSize(context, baseOnPhone: 22, maxOnDesktop: 32), fontWeight: FontWeight.bold, color: Colors.white)),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -108,7 +105,7 @@ class _LessonNode extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            const Text('Best ', style: TextStyle(color: Colors.white)),
+            Text('Best: ${progress.bestStreak}', style: const TextStyle(color: Colors.white)),
           ],
         ),
       ),
