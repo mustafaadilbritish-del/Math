@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/responsive.dart';
 
 class Mascot extends StatelessWidget {
   final String mood; // 'idle' | 'cheer' | 'encourage' | 'celebrate'
@@ -6,10 +7,11 @@ class Mascot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double size = scaledFontSize(context, baseOnPhone: 100, maxOnDesktop: 160);
     // Placeholder box where Rive animation will be embedded later
     return Container(
-      width: 120,
-      height: 120,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: Colors.blue.shade50,
         borderRadius: BorderRadius.circular(16),

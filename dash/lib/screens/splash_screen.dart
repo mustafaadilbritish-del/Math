@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_providers.dart';
 import 'profile_screen.dart';
 import 'map_screen.dart';
+import '../utils/responsive.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -30,9 +31,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: Text('Dash', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
+        child: Text(
+          'Dash',
+          style: TextStyle(fontSize: scaledFontSize(context, baseOnPhone: 36, maxOnDesktop: 64), fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }

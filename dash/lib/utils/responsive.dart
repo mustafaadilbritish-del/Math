@@ -46,3 +46,21 @@ Widget constrainedBody({required Widget child, double maxWidth = 900}) {
     ),
   );
 }
+
+// Width-based helpers for use inside LayoutBuilder and constrained containers
+bool isPhoneWidth(double width) => width < Breakpoints.tablet;
+bool isTabletWidth(double width) => width >= Breakpoints.tablet && width < Breakpoints.desktop;
+bool isDesktopWidth(double width) => width >= Breakpoints.desktop;
+
+int gridCountForMaxWidth(double width, {int phone = 3, int tablet = 4, int desktop = 6, int largeDesktop = 8}) {
+  if (width >= Breakpoints.largeDesktop) return largeDesktop;
+  if (width >= Breakpoints.desktop) return desktop;
+  if (width >= Breakpoints.tablet) return tablet;
+  return phone;
+}
+
+EdgeInsets pagePadding(BuildContext context) {
+  if (isPhone(context)) return const EdgeInsets.all(12);
+  if (isTablet(context)) return const EdgeInsets.all(16);
+  return const EdgeInsets.all(24);
+}
