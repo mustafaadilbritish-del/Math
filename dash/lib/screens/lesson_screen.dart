@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/app_providers.dart';
 import '../utils/responsive.dart';
+import '../models/lesson_question.dart';
+import '../utils/question_generator.dart';
+import '../widgets/quiz_widgets.dart';
+import '../widgets/heart_lives.dart';
 
 class LessonArgs {
   final int table;
@@ -27,12 +31,16 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   late int table;
   late bool isDivision;
   int currentQuestionIndex = 0;
-  int currentLeft = 2;
-  int currentRight = 2;
   String? feedback; // 'correct' | 'wrong'
   int streak = 0;
   int lives = livesMax;
   final TextEditingController inputController = TextEditingController();
+
+  // Adaptive difficulty based on streak: 0..2
+  int get _difficultyIndex => streak >= 6 ? 2 : streak >= 3 ? 1 : 0;
+
+  final QuestionGenerator _generator = QuestionGenerator();
+  LessonQuestion? _current;
 
   @override
   void didChangeDependencies() {
@@ -44,21 +52,13 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   }
 
   void _generateQuestion() {
-    final rand = Random();
-    if (!isDivision) {
-      currentLeft = table;
-      currentRight = rand.nextInt(11) + 1; // 1..12
-    } else {
-      // For division: (table * k) ÷ table = k
-      currentRight = table;
-      final k = rand.nextInt(11) + 1; // 1..12
-      currentLeft = k * table;
-    }
+    _current = _generator.generate(table: table, isDivision: isDivision, difficultyIndex: _difficultyIndex);
     inputController.clear();
   }
 
   void _submitAnswer(int answer) async {
-    final correctAnswer = isDivision ? (currentLeft ~/ currentRight) : (currentLeft * currentRight);
+    if (_current == null) return;
+    final int correctAnswer = _current!.correctAnswer ?? 0;
     final isCorrect = answer == correctAnswer;
 
     setState(() {
@@ -70,6 +70,14 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         lives -= 1;
       }
     });
+
+    // sound/haptics
+    final sound = ref.read(soundServiceProvider);
+    if (isCorrect) {
+      await sound.correct();
+    } else {
+      await sound.wrong();
+    }
 
     await Future.delayed(const Duration(milliseconds: 450));
 
@@ -118,7 +126,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final prompt = !isDivision ? '${currentLeft} × ${currentRight} = ?' : '${currentLeft} ÷ ${currentRight} = ?';
+    final LessonQuestion? q = _current;
 
     return Scaffold(
       appBar: AppBar(title: Text('Lesson ${isDivision ? 'Division' : 'Multiplication'} $table')),
@@ -131,16 +139,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(children: [
-                    for (int i = 0; i < livesMax; i++)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: Icon(
-                          Icons.favorite,
-                          color: i < lives ? Colors.red : Colors.grey.shade400,
-                        ),
-                      ),
-                  ]),
+                  HeartLives(lives: lives, maxLives: livesMax),
                   Text('Q ${currentQuestionIndex + 1}/$questionsPerLesson'),
                   Text('Streak: $streak'),
                 ],
@@ -148,13 +147,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
               const SizedBox(height: 16),
               Expanded(
                 child: Center(
-                  child: Text(
-                    prompt,
-                    style: TextStyle(
-                      fontSize: scaledFontSize(context, baseOnPhone: 36, maxOnDesktop: 64),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: _buildQuestionContent(q),
                 ),
               ),
               if (feedback == 'correct')
@@ -162,35 +155,70 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
               if (feedback == 'wrong')
                 const Text('Try again!', textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontSize: 20)),
               const SizedBox(height: 12),
-              _NumberPad(onSubmit: _submitAnswer),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: inputController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Enter answer'),
+              if (q != null && q.type == QuestionType.numberEntry) ...[
+                _NumberPad(onSubmit: _submitAnswer),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: inputController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Enter answer'),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      final txt = inputController.text;
-                      final parsed = int.tryParse(txt);
-                      if (parsed != null) {
-                        _submitAnswer(parsed);
-                      }
-                    },
-                    child: const Text('Submit'),
-                  )
-                ],
-              ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        final txt = inputController.text;
+                        final parsed = int.tryParse(txt);
+                        if (parsed != null) {
+                          _submitAnswer(parsed);
+                        }
+                      },
+                      child: const Text('Submit'),
+                    )
+                  ],
+                ),
+              ]
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildQuestionContent(LessonQuestion? q) {
+    if (q == null) return const SizedBox.shrink();
+    switch (q.type) {
+      case QuestionType.numberEntry:
+        final prompt = !q.isDivision ? '${q.left} × ${q.right} = ?' : '${q.left} ÷ ${q.right} = ?';
+        return Text(
+          prompt,
+          style: TextStyle(
+            fontSize: scaledFontSize(context, baseOnPhone: 36, maxOnDesktop: 64),
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      case QuestionType.multipleChoice:
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              !q.isDivision ? '${q.left} × ${q.right} = ?' : '${q.left} ÷ ${q.right} = ?',
+              style: TextStyle(fontSize: scaledFontSize(context, baseOnPhone: 28, maxOnDesktop: 48), fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            MultipleChoiceList(options: q.options!, onSelected: _submitAnswer),
+          ],
+        );
+      case QuestionType.pattern:
+        return PatternGrid(
+          data: q.pattern!,
+          options: q.options!,
+          onSelected: _submitAnswer,
+        );
+    }
   }
 }
 

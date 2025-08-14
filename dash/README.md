@@ -1,16 +1,28 @@
-# dash
+# Dash - Times Tables (Flutter)
 
-A new Flutter project.
+This app teaches multiplication and division tables (2–12) with a playful, Duolingo‑inspired flow.
 
-## Getting Started
+Run locally
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+flutter run -d chrome
+```
 
-A few resources to get you started if this is your first Flutter project:
+What’s in this build
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Learning path grid for ×2..×12 and ÷2..÷12
+- Lesson with 10 questions, 3 lives, streak, stars awarded at the end
+- Three question types
+  - Number entry (keypad)
+  - Multiple choice
+  - Follow the pattern (like the screenshots)
+- Adaptive difficulty based on streak
+- Local progress storage via SharedPreferences + Hive profile model (optional)
+- Sound/haptics feedback stubs
+- Rive-friendly placeholders with `SafeRive`
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Notes
+
+- Assets under `assets/animations` can be replaced with real `.riv` files and wired where needed.
+- UI is intentionally kid‑friendly and responsive.
