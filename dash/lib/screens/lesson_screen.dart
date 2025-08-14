@@ -122,70 +122,72 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text('Lesson ${isDivision ? 'Division' : 'Multiplication'} $table')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(children: [
-                  for (int i = 0; i < livesMax; i++)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Icon(
-                        Icons.favorite,
-                        color: i < lives ? Colors.red : Colors.grey.shade400,
+      body: constrainedBody(
+        child: Padding(
+          padding: pagePadding(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(children: [
+                    for (int i = 0; i < livesMax; i++)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Icon(
+                          Icons.favorite,
+                          color: i < lives ? Colors.red : Colors.grey.shade400,
+                        ),
                       ),
+                  ]),
+                  Text('Q ${currentQuestionIndex + 1}/$questionsPerLesson'),
+                  Text('Streak: $streak'),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    prompt,
+                    style: TextStyle(
+                      fontSize: scaledFontSize(context, baseOnPhone: 36, maxOnDesktop: 64),
+                      fontWeight: FontWeight.bold,
                     ),
-                ]),
-                Text('Q ${currentQuestionIndex + 1}/$questionsPerLesson'),
-                Text('Streak: $streak'),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Center(
-                child: Text(
-                  prompt,
-                  style: TextStyle(
-                    fontSize: scaledFontSize(context, baseOnPhone: 36, maxOnDesktop: 64),
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            ),
-            if (feedback == 'correct')
-              const Text('Great job!', textAlign: TextAlign.center, style: TextStyle(color: Colors.green, fontSize: 20)),
-            if (feedback == 'wrong')
-              const Text('Try again!', textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontSize: 20)),
-            const SizedBox(height: 12),
-            _NumberPad(onSubmit: _submitAnswer),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: inputController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Enter answer'),
+              if (feedback == 'correct')
+                const Text('Great job!', textAlign: TextAlign.center, style: TextStyle(color: Colors.green, fontSize: 20)),
+              if (feedback == 'wrong')
+                const Text('Try again!', textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontSize: 20)),
+              const SizedBox(height: 12),
+              _NumberPad(onSubmit: _submitAnswer),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: inputController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Enter answer'),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    final txt = inputController.text;
-                    final parsed = int.tryParse(txt);
-                    if (parsed != null) {
-                      _submitAnswer(parsed);
-                    }
-                  },
-                  child: const Text('Submit'),
-                )
-              ],
-            ),
-          ],
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      final txt = inputController.text;
+                      final parsed = int.tryParse(txt);
+                      if (parsed != null) {
+                        _submitAnswer(parsed);
+                      }
+                    },
+                    child: const Text('Submit'),
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

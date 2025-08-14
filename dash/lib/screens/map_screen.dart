@@ -27,33 +27,46 @@ class MapScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: GridView.count(
-          crossAxisCount: gridCountForWidth(context, phone: 3, tablet: 4, desktop: 6, largeDesktop: 8),
-          childAspectRatio: isPhone(context) ? 1.0 : 1.2,
-          crossAxisSpacing: isPhone(context) ? 8 : 12,
-          mainAxisSpacing: isPhone(context) ? 8 : 12,
-          children: [
-            for (int t = 2; t <= 12; t++)
-              _LessonNode(
-                label: 'x$t',
-                progress: ref.read(progressMapProvider.notifier).getProgress(t, false),
-                onTap: () => Navigator.of(context).pushNamed(
-                  LessonScreen.routeName,
-                  arguments: LessonArgs(table: t, isDivision: false),
-                ),
-              ),
-            for (int t = 2; t <= 12; t++)
-              _LessonNode(
-                label: '÷$t',
-                progress: ref.read(progressMapProvider.notifier).getProgress(t, true),
-                onTap: () => Navigator.of(context).pushNamed(
-                  LessonScreen.routeName,
-                  arguments: LessonArgs(table: t, isDivision: true),
-                ),
-              ),
-          ],
+      body: constrainedBody(
+        child: Padding(
+          padding: pagePadding(context),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final crossAxisCount = gridCountForMaxWidth(
+                constraints.maxWidth,
+                phone: 3,
+                tablet: 4,
+                desktop: 6,
+                largeDesktop: 8,
+              );
+              return GridView.count(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: isPhone(context) ? 1.0 : 1.2,
+                crossAxisSpacing: isPhone(context) ? 8 : 12,
+                mainAxisSpacing: isPhone(context) ? 8 : 12,
+                children: [
+                  for (int t = 2; t <= 12; t++)
+                    _LessonNode(
+                      label: 'x$t',
+                      progress: ref.read(progressMapProvider.notifier).getProgress(t, false),
+                      onTap: () => Navigator.of(context).pushNamed(
+                        LessonScreen.routeName,
+                        arguments: LessonArgs(table: t, isDivision: false),
+                      ),
+                    ),
+                  for (int t = 2; t <= 12; t++)
+                    _LessonNode(
+                      label: '÷$t',
+                      progress: ref.read(progressMapProvider.notifier).getProgress(t, true),
+                      onTap: () => Navigator.of(context).pushNamed(
+                        LessonScreen.routeName,
+                        arguments: LessonArgs(table: t, isDivision: true),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -82,7 +95,7 @@ class _LessonNode extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(label, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+            Text(label, style: TextStyle(fontSize: scaledFontSize(context, baseOnPhone: 22, maxOnDesktop: 32), fontWeight: FontWeight.bold, color: Colors.white)),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -95,7 +108,7 @@ class _LessonNode extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            Text('Best ${progress.bestStreak}', style: const TextStyle(color: Colors.white)),
+            const Text('Best ', style: TextStyle(color: Colors.white)),
           ],
         ),
       ),
